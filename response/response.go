@@ -90,3 +90,12 @@ type MaintenanceInfo struct {
 	Private string            `json:"private,omitempty"`
 	Version string            `json:"version,omitempty"`
 }
+
+
+type Config struct {
+	GPDBInstanceGroupName	string 	`json:"gpdb_instance_group_name"`
+	GPDBInstanceIP 			string 	`json:"gpdb_instance_ip"`
+	GPDBAdminUsername 		string	`json:"gpdb_admin_username"`
+	GPDBAdminPassword 		string 	`json:"gpdb_admin_password"`
+	ConnectionPort 			int 	`json:"connection_port"`
+}
