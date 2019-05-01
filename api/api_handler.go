@@ -6,7 +6,6 @@ import (
 	"github.com/degaurab/gbdb-adapter/gpdb-client"
 	"github.com/degaurab/gbdb-adapter/helper"
 	"github.com/gorilla/mux"
-	"io"
 	"log"
 	"net/http"
 )
@@ -30,8 +29,8 @@ type ApiHandler struct {
 
 
 type response struct {
-	result interface{} `json:"result"`
-	error string `json:"error"`
+	Result interface{} `json:"result"`
+	Error string `json:"error"`
 }
 
 func (api ApiHandler) ServiceCatalog(httpWriter http.ResponseWriter, httpReqest *http.Request)  {
@@ -40,10 +39,10 @@ func (api ApiHandler) ServiceCatalog(httpWriter http.ResponseWriter, httpReqest 
 
 	catalog, err := config.LoadCatalog(api.catalogPath, api.logger)
 	if err != nil {
-		resp.error = err.Error()
+		resp.Error = err.Error()
 	}
 
-	resp.result = catalog
+	resp.Result = catalog
 	api.logger.Println("response:", resp)
 
 	api.respond(httpWriter, 200, resp)
@@ -61,7 +60,7 @@ func (api ApiHandler) CreateBinding(httpWriter http.ResponseWriter, httpReqest *
 
 	c, err := config.LoadConfig(api.configPath, api.logger)
 	if err != nil {
-		resp.error = err.Error()
+		resp.Error = err.Error()
 		json.NewEncoder(httpWriter).Encode(resp)
 	}
 
@@ -77,10 +76,10 @@ func (api ApiHandler) CreateBinding(httpWriter http.ResponseWriter, httpReqest *
 	dbName := "client-" + randUsername
 	user, err := driver.InitializeDBForUser(dbName, randUsername, api.logger)
 	if err != nil {
-		resp.error = err.Error()
+		resp.Error = err.Error()
 	}
 
-	resp.result = user
+	resp.Result = user
 
 	api.logger.Println(resp)
 	api.respond(httpWriter, 200, resp)
@@ -92,7 +91,7 @@ func (api ApiHandler) DeleteBinding(httpWriter http.ResponseWriter, r *http.Requ
 
 	c, err := config.LoadConfig(api.configPath, api.logger)
 	if err != nil {
-		resp.error = err.Error()
+		resp.Error = err.Error()
 		json.NewEncoder(httpWriter).Encode(resp)
 	}
 
@@ -117,7 +116,5 @@ func (api ApiHandler) respond(w http.ResponseWriter, status int, response interf
 	if err != nil {
 		api.logger.Println(err, "encoding response")
 	}
-	output,_ := json.Marshal(response)
-	io.WriteString(w, string(output))
 }
 

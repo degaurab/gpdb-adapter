@@ -2,34 +2,14 @@ package config
 
 import (
 	"github.com/degaurab/gbdb-adapter/helper"
+	"github.com/degaurab/gbdb-adapter/response"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 )
 
-type Catalog struct {
-	Services []Service
-}
-
-type Service struct {
-	Name string `yaml:"name"`
-	Id string `yaml:"id"`
-	Desc string `yaml:"description"`
-	Plans []Plan `yaml:"plans"`
-}
-
-
-type Plan struct {
-	Name string `yaml:"name"`
-	Id string `yaml:"id"`
-	Metadata map[string]interface{} `yaml:"metadata"`
-}
-
-
-
-func LoadCatalog(catalogFilePath string, logger *log.Logger) (Catalog, error) {
-	catalog := Catalog{}
-
+func LoadCatalog(catalogFilePath string, logger *log.Logger) (response.CatalogResponse, error) {
+	catalog := response.CatalogResponse{}
 	yamlFile, err := ioutil.ReadFile(catalogFilePath)
 	if err != nil {
 		return catalog, helper.WrappedError("Error loading catalog file", err, logger)
