@@ -93,9 +93,9 @@ type MaintenanceInfo struct {
 
 
 type Config struct {
-	GPDBInstanceGroupName	string 	`json:"gpdb_instance_group_name"`
-	GPDBInstanceIP 			string 	`json:"gpdb_instance_ip"`
-	GPDBAdminUsername 		string	`json:"gpdb_admin_username"`
-	GPDBAdminPassword 		string 	`json:"gpdb_admin_password"`
-	ConnectionPort 			int 	`json:"connection_port"`
+	InstanceGroupName	string 	`yaml:"instance_group_name"`
+	InstanceIP 			string 	`yaml:"instance_ip"`
+	AdminUsername 		string	`yaml:"admin_username"`
+	AdminPassword 		string 	`yaml:"admin_password"`
+	ConnectionPort 		int 	`yaml:"connection_port"`
 }

@@ -22,5 +22,10 @@ func LoadConfig(configFilePath string, logger *log.Logger) (response.Config, err
 		return config, helper.WrappedError("Error parsing yaml file", err, logger)
 	}
 
+	logger.Println("DB config loaded:", config)
+	//if config.InstanceIP == "" {
+	//	return response.Config{}, helper.WrappedError("Error parsing yaml file", errors.New(""), logger)
+	//}
+
 	return config, nil
 }

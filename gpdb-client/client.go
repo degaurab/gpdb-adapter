@@ -59,7 +59,7 @@ func (driver DBDriver) TestConnection(logger *log.Logger) error{
 
 	rows, err := db.Query("SHOW DATABASES")
 	if err != nil || rows.Err() != nil {
-		log.Println(err, fmt.Sprint("Row error: %s", rows.Err()))
+		log.Println(err, fmt.Sprintf("Row error: %s", rows.Err()))
 		return errors.New("Load connection query failed")
 	}
 
@@ -78,7 +78,9 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 		return NewUser{}, errors.New("Connection Failed")
 	}
 
-	_, err = db.Query(fmt.Sprint("CREATE DATABSE %s", dbname))
+	queryString := fmt.Sprintf("CREATE DATABASE %s", dbname)
+	logger.Println("creating database: ", queryString)
+	_, err = db.Query(queryString)
 	if err != nil{
 		log.Println(err)
 		return NewUser{}, errors.New("DB creation error")
@@ -86,7 +88,9 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 
 	n.Password = randStringBytes()
 
-	_, err = db.Query(fmt.Sprint("CREATE USER %s with encrypted password '%s'", n.UserName, n.Password))
+	queryString = fmt.Sprintf("CREATE USER %s with encrypted password '%s'", n.UserName, n.Password)
+	logger.Println("creating user: ", queryString)
+	_, err = db.Query(queryString)
 	if err != nil{
 		log.Println(err)
 		return NewUser{}, errors.New("Create user error")
@@ -99,8 +103,9 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 	GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
 	 */
 
-
-	_, err = db.Query(fmt.Sprint(	"	GRANT ALL PRIVILEGES ON DATABASE %s TO %s", n.DBName, n.UserName))
+	queryString = fmt.Sprintf(	"GRANT ALL PRIVILEGES ON DATABASE %s TO %s", n.DBName, n.UserName)
+	logger.Println("granting access: ", queryString)
+	_, err = db.Query(queryString)
 	if err != nil{
 		log.Println(err)
 		return NewUser{}, errors.New("Granting access to user to database error")
@@ -117,13 +122,13 @@ func (driver DBDriver) DeleteDatabase(dbname string) error {
 		return errors.New("Connection Failed")
 	}
 
-	row, err := db.Query(fmt.Sprint("SELECT * FROM pq_database WHERE datname='%s'", dbname))
+	row, err := db.Query(fmt.Sprintf("SELECT * FROM pq_database WHERE datname='%s'", dbname))
 	if err != nil || row.Next() {
 		log.Println(err)
 		return errors.New("Incorrect DB name")
 	}
 
-	_, err = db.Query(fmt.Sprint(	"DROP DATABASE %s", dbname))
+	_, err = db.Query(fmt.Sprintf(	"DROP DATABASE %s", dbname))
 	if err != nil{
 		log.Println(err)
 		return errors.New("Granting access to user to database error")
@@ -135,11 +140,11 @@ func (driver DBDriver) DeleteDatabase(dbname string) error {
 
 
 func (db DBDriver) createConnectionString() string{
-	connString := fmt.Sprint("user=%s password=%s host=%s dbname=%s",db.User, db.Password, db.Hostname, db.DatabaseName)
+	connString := fmt.Sprintf("user=%s password=%s host=%s dbname=%s",db.User, db.Password, db.Hostname, db.DatabaseName)
 	if db.SSLMode != "" {
-		connString += connString + fmt.Sprint("sslmode=%s", db.SSLMode)
+		connString += connString + fmt.Sprintf("sslmode=%s", db.SSLMode)
 	}
-
+	log.Println(connString)
 	return connString
 }
 

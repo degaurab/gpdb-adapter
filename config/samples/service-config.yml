@@ -1,6 +1,6 @@
 ---
-gpdb_instance_group_name: "instance-group-name"
-gpdb_instance_ip: "xx.xx.xx.xx"
-gpdb_admin_username: "admin-username"
-gpdb_admin_password: "gpdb_admin_password"
+instance_group_name: "instance-group-name"
+instance_ip: "xx.xx.xx.xx"
+admin_username: "admin-username"
+admin_password: "gpdb_admin_password"
 connection_port: 5232

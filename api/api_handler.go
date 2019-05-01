@@ -16,9 +16,9 @@ func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Rout
 		configPath: confPath,
 		catalogPath: catPath,
 	}
-	r.HandleFunc("/v2/catalog", api.ServiceCatalog).Methods("GET")
-	r.HandleFunc("/v2/create_binding", api.CreateBinding).Methods("POST")
-	r.HandleFunc("/v2/delete_binding", api.DeleteBinding).Methods("POST")
+	r.HandleFunc("/v2/catalog", api.serviceCatalog).Methods("GET")
+	r.HandleFunc("/v2/create_binding", api.createBinding).Methods("PUT")
+	r.HandleFunc("/v2/delete_binding", api.deleteBinding).Methods("PUT")
 }
 
 type ApiHandler struct {
@@ -33,13 +33,15 @@ type response struct {
 	Error string `json:"error"`
 }
 
-func (api ApiHandler) ServiceCatalog(httpWriter http.ResponseWriter, httpReqest *http.Request)  {
+func (api ApiHandler) serviceCatalog(httpWriter http.ResponseWriter, httpReqest *http.Request)  {
 	api.logger.Println("loding config")
 	resp := response{}
 
 	catalog, err := config.LoadCatalog(api.catalogPath, api.logger)
 	if err != nil {
 		resp.Error = err.Error()
+		api.respond(httpWriter, 500, resp)
+		return
 	}
 
 	resp.Result = catalog
@@ -48,7 +50,7 @@ func (api ApiHandler) ServiceCatalog(httpWriter http.ResponseWriter, httpReqest 
 	api.respond(httpWriter, 200, resp)
 }
 
-func (api ApiHandler) CreateBinding(httpWriter http.ResponseWriter, httpReqest *http.Request) {
+func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *http.Request) {
 	//return nil, nil
 	api.logger.Println("Started Creating Binding")
 	resp := response{}
@@ -61,45 +63,49 @@ func (api ApiHandler) CreateBinding(httpWriter http.ResponseWriter, httpReqest *
 	c, err := config.LoadConfig(api.configPath, api.logger)
 	if err != nil {
 		resp.Error = err.Error()
-		json.NewEncoder(httpWriter).Encode(resp)
+		api.respond(httpWriter, 500, resp)
+		return
 	}
 
 	driver := gpdb_client.DBDriver{
-		User: c.GPDBAdminUsername,
-		Password: c.GPDBAdminPassword,
+		User: c.AdminUsername,
+		Password: c.AdminPassword,
 		Port: c.ConnectionPort,
-		Hostname: c.GPDBInstanceIP,
+		Hostname: c.InstanceIP,
 	}
+
+	api.logger.Println(driver)
 
 	//Creating DB, User and grant access
 	randUsername := helper.RandStringBytes(5)
-	dbName := "client-" + randUsername
+	dbName := "client" + randUsername
 	user, err := driver.InitializeDBForUser(dbName, randUsername, api.logger)
 	if err != nil {
 		resp.Error = err.Error()
+		api.respond(httpWriter, 500, resp)
+		return
 	}
 
 	resp.Result = user
-
-	api.logger.Println(resp)
 	api.respond(httpWriter, 200, resp)
 }
 
 
-func (api ApiHandler) DeleteBinding(httpWriter http.ResponseWriter, r *http.Request)  {
+func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Request)  {
 	resp := response{}
 
 	c, err := config.LoadConfig(api.configPath, api.logger)
 	if err != nil {
 		resp.Error = err.Error()
-		json.NewEncoder(httpWriter).Encode(resp)
+		api.respond(httpWriter, 500, resp)
+		return
 	}
 
 	driver := gpdb_client.DBDriver{
-		User: c.GPDBAdminUsername,
-		Password: c.GPDBAdminPassword,
+		User: c.AdminUsername,
+		Password: c.AdminPassword,
 		Port: c.ConnectionPort,
-		Hostname: c.GPDBInstanceIP,
+		Hostname: c.InstanceIP,
 	}
 
 	//TODO: extract from payload
