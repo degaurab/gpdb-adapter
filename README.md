@@ -5,7 +5,7 @@
 
 
 
-## TODO:
+### TODO:
 
 - update API endpoints to match brokerAPI endpoints
 
@@ -46,3 +46,36 @@ postgres=# \l
 
 - Make sure delete works.
 - Move testing to container
+
+
+
+### Build and Run
+
+```bash
+#-----------------------
+$ cd github.com/degaurab/gbdp-adapter
+$ go build main.go
+
+## run
+$ ./main
+
+## Add catalog and config file to `/tmp`
+## Samples are in `config/samples`
+## Default path:
+### //CatalogPath for testing
+### const CatalogPath = "/tmp/catalog.yml"
+### //ConfigPath for testing
+### const ConfigPath = "/tmp/service-config.yml"
+# -----------------------
+
+
+### different terminal
+
+## to view catalog
+$ curl -X GET http://localhost:8080/v2/catalog | jq .
+
+## to create binding (need to be fixed)
+$ curl -X PUT http://localhost:8080/v2/create_binding | jq .
+
+```
+

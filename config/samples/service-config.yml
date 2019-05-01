@@ -1,6 +1,6 @@
 ---
 instance_group_name: "instance-group-name"
-instance_ip: "xx.xx.xx.xx"
-admin_username: "admin-username"
+instance_ip: "localhost"
+admin_username: "postgres"
 admin_password: "gpdb_admin_password"
 connection_port: 5232
