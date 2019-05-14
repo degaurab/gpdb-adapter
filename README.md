@@ -4,6 +4,7 @@
 - No tests 
 
 
+----
 
 ### TODO:
 
@@ -48,6 +49,24 @@ postgres=# \l
 - Move testing to container
 
 
+----
+## `template` sql files
+
+We can update the files in ./templates/create_*.sql, which are used to bootstrap users with:
+- user and password
+- default schema associated with the user
+- with all the access to that schema
+
+
+- **./templates/create_schema.sql**
+    - used to bootstrap schema associated with the user
+    - Limitation:
+        - you can only use `schema_name` and `schema_username` variables in `create_schema.sql` file, if you are updating the schema details.
+- **./templates/create_schema.sql**
+    - used to bootstrap user
+    - Limitation:
+        - you can only use `schema_username` if `create_user.sql` file, if you are updating the user details.
+----
 
 ### Build and Run
 
@@ -77,5 +96,15 @@ $ curl -X GET http://localhost:8080/v2/catalog | jq .
 ## to create binding (need to be fixed)
 $ curl -X PUT http://localhost:8080/v2/create_binding | jq .
 
+{
+  "result": {
+    "user_name": "rUser",
+    "schema_name": "rSchema",
+    "password": "password"
+  },
+  "error": ""
+}
+
 ```
+
 
