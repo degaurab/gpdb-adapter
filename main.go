@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	//"fmt"
@@ -11,18 +12,32 @@ import (
 	"github.com/degaurab/gbdb-adapter/api"
 )
 
-//CatalogPath for testing
-const CatalogPath = "/tmp/catalog.yml"
-//ConfigPath for testing
-const ConfigPath = "/tmp/service-config.yml"
-
+////CatalogPath for testing
+//const CatalogPath = "/tmp/catalog.yml"
+////ConfigPath for testing
+//const ConfigPath = "/tmp/service-config.yml"
+//
 
 func main() {
 
 	log := log.New(os.Stderr,"[gbpd-service-adapter]", log.LstdFlags)
+	configPath := flag.String(
+		"config",
+		"/tmp/service-config.yml",
+		"Path for service-config.yml",
+		)
+	catalogPath := flag.String(
+		"catalog",
+		"/tmp/catalog.yml",
+		"Path for catalog.yml",
+		)
+
+	flag.Parse()
+	log.Println("Args:", flag.Args())
+
 	r := mux.NewRouter()
 
-	api.NewApiHandler(log, ConfigPath, CatalogPath, r)
+	api.NewApiHandler(log, *configPath, *catalogPath, r)
 
 
 	log.Println("Server Started. Listning on :8080")

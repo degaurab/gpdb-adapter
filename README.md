@@ -9,7 +9,7 @@
 
 - update API endpoints to match brokerAPI endpoints
 
-    ```$xslt
+    ```go
 	router.HandleFunc("/v2/service_instances/{instance_id}", handler.getInstance).Methods("GET")
 	router.HandleFunc("/v2/service_instances/{instance_id}", handler.provision).Methods("PUT")
 	router.HandleFunc("/v2/service_instances/{instance_id}", handler.deprovision).Methods("DELETE")

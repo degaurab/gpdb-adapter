@@ -18,7 +18,7 @@ func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Rout
 	}
 	r.HandleFunc("/v2/catalog", api.serviceCatalog).Methods("GET")
 	r.HandleFunc("/v2/create_binding", api.createBinding).Methods("PUT")
-	r.HandleFunc("/v2/delete_binding", api.deleteBinding).Methods("PUT")
+	r.HandleFunc("/v2/delete_binding/{binding_id}", api.deleteBinding).Methods("PUT")
 }
 
 type ApiHandler struct {
@@ -67,11 +67,18 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 		return
 	}
 
+	dbTemplate := gpdb_client.DBTemplate{
+		TemplatePath: c.TemplatePath,
+		SchemaTemplateFile: c.SchemaTemplateFile,
+		UserTemplateFile: c.UserTemplateFile,
+	}
+
 	driver := gpdb_client.DBDriver{
 		User: c.AdminUsername,
 		Password: c.AdminPassword,
 		Port: c.ConnectionPort,
 		Hostname: c.InstanceIP,
+		DBTemplate: dbTemplate,
 	}
 
 	api.logger.Println(driver)
@@ -92,6 +99,9 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 
 
 func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Request)  {
+	data := mux.Vars(r)
+	bindingID := data["binding_id"]
+
 	resp := response{}
 
 	c, err := config.LoadConfig(api.configPath, api.logger)
@@ -109,7 +119,7 @@ func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Requ
 	}
 
 	//TODO: extract from payload
-	driver.DeleteDatabase("some-exisiting-DB")
+	driver.DeleteDatabase(bindingID, api.logger)
 	api.respond(httpWriter, 200, resp)
 }
 

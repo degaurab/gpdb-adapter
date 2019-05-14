@@ -23,8 +23,11 @@ import (
 	"github.com/degaurab/gbdb-adapter/helper"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"path"
+	"regexp"
 )
 
 
@@ -39,13 +42,20 @@ type DBDriver struct {
 	SSLKeyPath string
 	SSLRootCertPath string
 	ConnectionTimeout int
+	DBTemplate DBTemplate
+}
+
+type DBTemplate struct {
+	TemplatePath string
+	SchemaTemplateFile string
+	UserTemplateFile string
 }
 
 
 type NewUser struct {
-	UserName string `json:"user_name"`
-	DBName string `json:"db_name"`
-	Password string `json:"password"`
+	UserName   string `json:"user_name"`
+	SchemaName string `json:"schema_name"`
+	Password   string `json:"password"`
 }
 
 
@@ -68,7 +78,7 @@ func (driver DBDriver) TestConnection(logger *log.Logger) error{
 }
 
 func (driver DBDriver) InitializeDBForUser(dbname string, username string, logger *log.Logger) (n NewUser, err error){
-	n.DBName = dbname
+	n.SchemaName = dbname
 	n.UserName = username
 
 	connString := driver.createConnectionString()
@@ -78,17 +88,22 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 		return NewUser{}, errors.New("Connection Failed")
 	}
 
-	queryString := fmt.Sprintf("CREATE DATABASE %s", dbname)
-	logger.Println("creating database: ", queryString)
-	_, err = db.Query(queryString)
-	if err != nil{
-		log.Println(err)
-		return NewUser{}, errors.New("DB creation error")
-	}
-
+	/*
+		Creating user based on templates
+	 */
 	n.Password = randStringBytes()
 
-	queryString = fmt.Sprintf("CREATE USER %s with encrypted password '%s'", n.UserName, n.Password)
+	filePath := path.Join(driver.DBTemplate.TemplatePath, driver.DBTemplate.UserTemplateFile)
+	varMap := map[string]string {
+		"schema_username": n.UserName,
+		"schema_user_password": n.Password,
+	}
+	queryString, err := renderFileWithVariables(filePath, varMap)
+	if err != nil{
+		log.Println(err)
+		return NewUser{}, errors.New("User creation error")
+	}
+
 	logger.Println("creating user: ", queryString)
 	_, err = db.Query(queryString)
 	if err != nil{
@@ -97,41 +112,49 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 	}
 
 	/*
-	 TODO: Additional grant permission that can be added for each user creation
-	       this can be moved to seperate binary or rule engine later on
-
-	GRANT ALL PRIVILEGES ON DATABASE yourdbname TO youruser;
+		Creating schema and grant access associated with the user
 	 */
+	filePath = path.Join(driver.DBTemplate.TemplatePath, driver.DBTemplate.SchemaTemplateFile)
+	varMap = map[string]string {
+		"schema_username": n.UserName,
+		"schema_name": n.SchemaName,
+	}
 
-	queryString = fmt.Sprintf(	"GRANT ALL PRIVILEGES ON DATABASE %s TO %s", n.DBName, n.UserName)
-	logger.Println("granting access: ", queryString)
+	queryString, err = renderFileWithVariables(filePath, varMap)
+	if err != nil{
+		log.Println(err)
+		return NewUser{}, errors.New("User creation error")
+	}
+
+	logger.Println("creating schema: ", queryString)
 	_, err = db.Query(queryString)
 	if err != nil{
 		log.Println(err)
-		return NewUser{}, errors.New("Granting access to user to database error")
+		return NewUser{}, errors.New("DB creation error")
 	}
+	
 	return
 }
 
-func (driver DBDriver) DeleteDatabase(dbname string) error {
+func (driver DBDriver) DeleteDatabase(dbname string, logger *log.Logger) error {
 	connString := driver.createConnectionString()
 
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return errors.New("Connection Failed")
 	}
 
 	row, err := db.Query(fmt.Sprintf("SELECT * FROM pq_database WHERE datname='%s'", dbname))
 	if err != nil || row.Next() {
-		log.Println(err)
-		return errors.New("Incorrect DB name")
+		logger.Println(err)
+		return errors.New(fmt.Sprintf("Incorrect binding_id: %s", dbname))
 	}
 
 	_, err = db.Query(fmt.Sprintf(	"DROP DATABASE %s", dbname))
 	if err != nil{
-		log.Println(err)
-		return errors.New("Granting access to user to database error")
+		logger.Println(err)
+		return errors.New("Dropping database error")
 	}
 	return nil
 }
@@ -140,7 +163,10 @@ func (driver DBDriver) DeleteDatabase(dbname string) error {
 
 
 func (db DBDriver) createConnectionString() string{
-	connString := fmt.Sprintf("user=%s password=%s host=%s dbname=%s",db.User, db.Password, db.Hostname, db.DatabaseName)
+	connString := fmt.Sprintf("user=%s password=%s host=%s",db.User, db.Password, db.Hostname)
+	if db.DatabaseName != "" {
+		connString += connString + fmt.Sprintf(" dbname=%s", db.DatabaseName)
+	}
 	if db.SSLMode != "" {
 		connString += connString + fmt.Sprintf("sslmode=%s", db.SSLMode)
 	}
@@ -156,4 +182,19 @@ func randStringBytes() string {
 		b[i] = helper.LetterBytes[rand.Intn(len(helper.LetterBytes))]
 	}
 	return string(b)
+}
+
+func renderFileWithVariables(templateFilePath string, vars map[string]string) (string, error) {
+	templateBytes, err := ioutil.ReadFile(templateFilePath)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("Loading template file: ", templateFilePath))
+	}
+
+	templateData := string(templateBytes)
+	for stringName, replaceWith := range vars {
+		regex := regexp.MustCompile(stringName)
+		templateData = regex.ReplaceAllString(templateData, replaceWith)
+	}
+
+	return templateData, nil
 }

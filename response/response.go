@@ -98,4 +98,7 @@ type Config struct {
 	AdminUsername 		string	`yaml:"admin_username"`
 	AdminPassword 		string 	`yaml:"admin_password"`
 	ConnectionPort 		int 	`yaml:"connection_port"`
+	TemplatePath        string  `yaml:"template_path"`
+	SchemaTemplateFile  string  `yaml:"schema_template_file"`
+	UserTemplateFile    string  `yaml:"user_template_file"`
 }

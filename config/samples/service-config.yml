@@ -2,5 +2,8 @@
 instance_group_name: "instance-group-name"
 instance_ip: "localhost"
 admin_username: "postgres"
-admin_password: "gpdb_admin_password"
+admin_password: "password"
 connection_port: 5232
+template_path: "/home/gdey/workspace/src/github.com/degaurab/gbdb-adapter/templates"
+schema_template_file: "create_schema.sql"
+user_template_file: "create_user.sql"

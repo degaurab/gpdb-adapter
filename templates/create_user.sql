@@ -1,0 +1,1 @@
+CREATE USER schema_username WITH ENCRYPTED PASSWORD 'schema_user_password';
