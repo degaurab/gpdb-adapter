@@ -7,6 +7,7 @@
 ----
 
 ### TODO:
+- Add default space for user when we initializing user
 
 - update API endpoints to match brokerAPI endpoints
 
