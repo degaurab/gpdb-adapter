@@ -17,7 +17,7 @@ func RandStringBytes(length int) string {
 	return string(b)
 }
 
-func WrappedError(errorMsg string, err error, logger *log.Logger)  error{
+func WrappedError(errorMsg string, err error, logger *log.Logger) error {
 	wrapperErr := errors.Wrap(err, errorMsg)
 	logger.Println(wrapperErr.Error())
 	return wrapperErr

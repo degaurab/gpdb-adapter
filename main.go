@@ -20,25 +20,24 @@ import (
 
 func main() {
 
-	log := log.New(os.Stderr,"[gbpd-service-adapter]", log.LstdFlags)
+	log := log.New(os.Stderr, "[gbpd-service-adapter]", log.LstdFlags)
 	configPath := flag.String(
 		"config",
 		"/tmp/service-config.yml",
 		"Path for service-config.yml",
-		)
+	)
 	catalogPath := flag.String(
 		"catalog",
 		"/tmp/catalog.yml",
 		"Path for catalog.yml",
-		)
+	)
 
 	flag.Parse()
-	log.Println("Args:", flag.Args())
+	log.Println("ConfigPath:", *configPath, "::", "CatalogPath:", *catalogPath)
 
 	r := mux.NewRouter()
 
 	api.NewApiHandler(log, *configPath, *catalogPath, r)
-
 
 	log.Println("Server Started. Listning on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))

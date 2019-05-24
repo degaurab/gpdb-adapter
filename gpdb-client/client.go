@@ -16,10 +16,11 @@ package gpdb_client
 * sslkey - Key file location. The file must contain PEM encoded data.
 * sslrootcert - The location of the root certificate file. The file
   must contain PEM encoded data.
- */
+*/
 import (
 	"database/sql"
 	"fmt"
+	"github.com/degaurab/gbdb-adapter/config"
 	"github.com/degaurab/gbdb-adapter/helper"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -30,27 +31,25 @@ import (
 	"regexp"
 )
 
-
 type DBDriver struct {
-	User string
-	Password string
-	Port int
-	Hostname string
-	DatabaseName string
-	SSLMode string
-	SSLCertPath string
-	SSLKeyPath string
-	SSLRootCertPath string
+	User              string
+	Password          string
+	Port              int
+	Hostname          string
+	DatabaseName      string
+	SSLMode           string
+	SSLCertPath       string
+	SSLKeyPath        string
+	SSLRootCertPath   string
 	ConnectionTimeout int
-	DBTemplate DBTemplate
+	DBTemplate        config.Templates
+	DataDriver			*sql.DB
 }
 
-type DBTemplate struct {
-	TemplatePath string
-	SchemaTemplateFile string
-	UserTemplateFile string
-}
 
+func NewDBDriver() {
+	return
+}
 
 type NewUser struct {
 	UserName   string `json:"user_name"`
@@ -58,31 +57,36 @@ type NewUser struct {
 	Password   string `json:"password"`
 }
 
-
-func (driver DBDriver) TestConnection(logger *log.Logger) error{
+func (driver DBDriver) TestConnection(logger *log.Logger) error {
 	connString := driver.createConnectionString()
 	db, err := sql.Open("postgres", connString)
+
+	defer db.Close()
+
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return errors.New("Connection Failed")
 	}
 
-	rows, err := db.Query("SHOW DATABASES")
-	if err != nil || rows.Err() != nil {
-		log.Println(err, fmt.Sprintf("Row error: %s", rows.Err()))
-		return errors.New("Load connection query failed")
+	err = db.Ping()
+	if err !=nil {
+		logger.Println(err)
+		return errors.New("test connection failed")
 	}
 
 	return nil
 
 }
 
-func (driver DBDriver) InitializeDBForUser(dbname string, username string, logger *log.Logger) (n NewUser, err error){
+func (driver DBDriver) InitializeDBForUser(dbname string, username string, logger *log.Logger) (n NewUser, err error) {
 	n.SchemaName = dbname
 	n.UserName = username
 
 	connString := driver.createConnectionString()
 	db, err := sql.Open("postgres", connString)
+
+	defer db.Close()
+
 	if err != nil {
 		log.Println(err)
 		return NewUser{}, errors.New("Connection Failed")
@@ -90,49 +94,51 @@ func (driver DBDriver) InitializeDBForUser(dbname string, username string, logge
 
 	/*
 		Creating user based on templates
-	 */
+	*/
 	n.Password = randStringBytes()
 
-	filePath := path.Join(driver.DBTemplate.TemplatePath, driver.DBTemplate.UserTemplateFile)
-	varMap := map[string]string {
-		"schema_username": n.UserName,
-		"schema_user_password": n.Password,
+	userTemplate := driver.DBTemplate.UserTemplate
+	filePath := path.Join(driver.DBTemplate.BaseDir, userTemplate.FileName)
+	varMap := map[string]string{
+		userTemplate.Vars["schema_username"]:      n.UserName,
+		userTemplate.Vars["schema_user_password"]: n.Password,
 	}
+
 	queryString, err := renderFileWithVariables(filePath, varMap)
-	if err != nil{
-		log.Println(err)
+	if err != nil {
+		logger.Println(err)
 		return NewUser{}, errors.New("User creation error")
 	}
 
 	logger.Println("creating user: ", queryString)
 	_, err = db.Query(queryString)
-	if err != nil{
-		log.Println(err)
+	if err != nil {
+		logger.Println(err)
 		return NewUser{}, errors.New("Create user error")
 	}
 
 	/*
 		Creating schema and grant access associated with the user
-	 */
-	filePath = path.Join(driver.DBTemplate.TemplatePath, driver.DBTemplate.SchemaTemplateFile)
-	varMap = map[string]string {
+	*/
+	filePath = path.Join(driver.DBTemplate.BaseDir, driver.DBTemplate.SchemaTemplate.FileName)
+	varMap = map[string]string{
 		"schema_username": n.UserName,
-		"schema_name": n.SchemaName,
+		"schema_name":     n.SchemaName,
 	}
 
 	queryString, err = renderFileWithVariables(filePath, varMap)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 		return NewUser{}, errors.New("User creation error")
 	}
 
 	logger.Println("creating schema: ", queryString)
 	_, err = db.Query(queryString)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 		return NewUser{}, errors.New("DB creation error")
 	}
-	
+
 	return
 }
 
@@ -140,6 +146,9 @@ func (driver DBDriver) DeleteDatabase(dbname string, logger *log.Logger) error {
 	connString := driver.createConnectionString()
 
 	db, err := sql.Open("postgres", connString)
+
+	defer db.Close()
+
 	if err != nil {
 		logger.Println(err)
 		return errors.New("Connection Failed")
@@ -151,29 +160,29 @@ func (driver DBDriver) DeleteDatabase(dbname string, logger *log.Logger) error {
 		return errors.New(fmt.Sprintf("Incorrect binding_id: %s", dbname))
 	}
 
-	_, err = db.Query(fmt.Sprintf(	"DROP DATABASE %s", dbname))
-	if err != nil{
+	_, err = db.Query(fmt.Sprintf("DROP DATABASE %s", dbname))
+	if err != nil {
 		logger.Println(err)
 		return errors.New("Dropping database error")
 	}
 	return nil
 }
 
-
-
-
-func (db DBDriver) createConnectionString() string{
-	connString := fmt.Sprintf("user=%s password=%s host=%s",db.User, db.Password, db.Hostname)
+func (db DBDriver) createConnectionString() string {
+	connString := fmt.Sprintf("user=%s password=%s host=%s port=%d",
+		db.User,
+		db.Password,
+		db.Hostname,
+		db.Port,
+	)
 	if db.DatabaseName != "" {
 		connString += connString + fmt.Sprintf(" dbname=%s", db.DatabaseName)
 	}
 	if db.SSLMode != "" {
 		connString += connString + fmt.Sprintf("sslmode=%s", db.SSLMode)
 	}
-	log.Println(connString)
 	return connString
 }
-
 
 func randStringBytes() string {
 
@@ -187,7 +196,7 @@ func randStringBytes() string {
 func renderFileWithVariables(templateFilePath string, vars map[string]string) (string, error) {
 	templateBytes, err := ioutil.ReadFile(templateFilePath)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Loading template file: ", templateFilePath))
+		return "", errors.New(fmt.Sprintf("Loading template file: %s", templateFilePath))
 	}
 
 	templateData := string(templateBytes)

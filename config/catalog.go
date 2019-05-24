@@ -14,7 +14,7 @@ func LoadCatalog(catalogFilePath string, logger *log.Logger) (response.CatalogRe
 	if err != nil {
 		return catalog, helper.WrappedError("Error loading catalog file", err, logger)
 	}
-	
+
 	err = yaml.Unmarshal(yamlFile, &catalog)
 	if err != nil {
 		return catalog, helper.WrappedError("Error parsing yaml file", err, logger)

@@ -12,8 +12,8 @@ import (
 
 func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Router) {
 	api := ApiHandler{
-		logger: log,
-		configPath: confPath,
+		logger:      log,
+		configPath:  confPath,
 		catalogPath: catPath,
 	}
 	r.HandleFunc("/v2/catalog", api.serviceCatalog).Methods("GET")
@@ -22,18 +22,17 @@ func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Rout
 }
 
 type ApiHandler struct {
-	logger *log.Logger
-	configPath string
+	logger      *log.Logger
+	configPath  string
 	catalogPath string
 }
 
-
 type response struct {
 	Result interface{} `json:"result"`
-	Error string `json:"error"`
+	Error  string      `json:"error"`
 }
 
-func (api ApiHandler) serviceCatalog(httpWriter http.ResponseWriter, httpReqest *http.Request)  {
+func (api ApiHandler) serviceCatalog(httpWriter http.ResponseWriter, httpReqest *http.Request) {
 	api.logger.Println("loding config")
 	resp := response{}
 
@@ -56,8 +55,8 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 	resp := response{}
 
 	/*
-	TODO: get the requested username and db from data payload
-	 */
+		TODO: get the requested username and db from data payload
+	*/
 	//data := httpReqest.Body
 
 	c, err := config.LoadConfig(api.configPath, api.logger)
@@ -67,18 +66,12 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 		return
 	}
 
-	dbTemplate := gpdb_client.DBTemplate{
-		TemplatePath: c.TemplatePath,
-		SchemaTemplateFile: c.SchemaTemplateFile,
-		UserTemplateFile: c.UserTemplateFile,
-	}
-
 	driver := gpdb_client.DBDriver{
-		User: c.AdminUsername,
-		Password: c.AdminPassword,
-		Port: c.ConnectionPort,
-		Hostname: c.InstanceIP,
-		DBTemplate: dbTemplate,
+		User:       c.AdminUsername,
+		Password:   c.AdminPassword,
+		Port:       c.ConnectionPort,
+		Hostname:   c.InstanceIP,
+		DBTemplate: c.Templates,
 	}
 
 	api.logger.Println(driver)
@@ -97,8 +90,7 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 	api.respond(httpWriter, 200, resp)
 }
 
-
-func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Request)  {
+func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Request) {
 	data := mux.Vars(r)
 	bindingID := data["binding_id"]
 
@@ -112,9 +104,9 @@ func (api ApiHandler) deleteBinding(httpWriter http.ResponseWriter, r *http.Requ
 	}
 
 	driver := gpdb_client.DBDriver{
-		User: c.AdminUsername,
+		User:     c.AdminUsername,
 		Password: c.AdminPassword,
-		Port: c.ConnectionPort,
+		Port:     c.ConnectionPort,
 		Hostname: c.InstanceIP,
 	}
 
@@ -133,4 +125,3 @@ func (api ApiHandler) respond(w http.ResponseWriter, status int, response interf
 		api.logger.Println(err, "encoding response")
 	}
 }
-

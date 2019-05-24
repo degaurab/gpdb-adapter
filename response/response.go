@@ -1,6 +1,5 @@
 package response
 
-
 type ErrorResponse struct {
 	Error       string `json:"error,omitempty"`
 	Description string `json:"description"`
@@ -8,9 +7,8 @@ type ErrorResponse struct {
 
 type CatalogResponse struct {
 	Services []Service `json:"services"`
-	Error string `json:"error"`
+	Error    string    `json:"error"`
 }
-
 
 type Service struct {
 	ID                   string                  `json:"id"`
@@ -22,7 +20,7 @@ type Service struct {
 	Tags                 []string                `json:"tags,omitempty"`
 	PlanUpdatable        bool                    `json:"plan_updateable"`
 	Plans                []ServicePlan           `json:"plans"`
-	Requires             []string				 `json:"requires,omitempty"`
+	Requires             []string                `json:"requires,omitempty"`
 	Metadata             *ServiceMetadata        `json:"metadata,omitempty"`
 	DashboardClient      *ServiceDashboardClient `json:"dashboard_client,omitempty"`
 }
@@ -89,16 +87,4 @@ type MaintenanceInfo struct {
 	Public  map[string]string `json:"public,omitempty"`
 	Private string            `json:"private,omitempty"`
 	Version string            `json:"version,omitempty"`
-}
-
-
-type Config struct {
-	InstanceGroupName	string 	`yaml:"instance_group_name"`
-	InstanceIP 			string 	`yaml:"instance_ip"`
-	AdminUsername 		string	`yaml:"admin_username"`
-	AdminPassword 		string 	`yaml:"admin_password"`
-	ConnectionPort 		int 	`yaml:"connection_port"`
-	TemplatePath        string  `yaml:"template_path"`
-	SchemaTemplateFile  string  `yaml:"schema_template_file"`
-	UserTemplateFile    string  `yaml:"user_template_file"`
 }
