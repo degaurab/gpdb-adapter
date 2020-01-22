@@ -74,10 +74,10 @@ We can update the files in ./templates/create_*.sql, which are used to bootstrap
 ```bash
 #-----------------------
 $ cd github.com/degaurab/gbdp-adapter
-$ go build main.go
+$ go build .
 
 ## run
-$ ./main
+$ ./gpdb-adapter --config <path-to-config> --catalog <path-to-catalog>
 
 ## Add catalog and config file to `/tmp`
 ## Samples are in `config/samples`
