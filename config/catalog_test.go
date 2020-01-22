@@ -1,13 +1,13 @@
 package config_test
 
-
 import (
-	"github.com/degaurab/gbdb-adapter/config"
+	"io"
+	"log"
+
+	"github.com/degaurab/gpdb-adapter/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
-	"io"
-	"log"
 )
 
 var _ = Describe("LoadConfig", func() {
@@ -31,7 +31,7 @@ var _ = Describe("LoadConfig", func() {
 				catalog, err := config.LoadCatalog(sampleConfigPath, logger)
 
 				Expect(err).NotTo(HaveOccurred())
-				Expect(catalog.Services[0].Name).To(Equal("gbdb-service"))
+				Expect(catalog.Services[0].Name).To(Equal("gpdb-service"))
 			})
 		})
 

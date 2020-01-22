@@ -1,0 +1,19 @@
+---
+instance_group_name: "instance-group-name"
+instance_ip: "localhost"
+admin_username: "postgres"
+admin_password: "password"
+connection_port: 5232
+templates:
+  basedir: "/home/gdey/workspace/src/github.com/degaurab/gbdb-adapter/templates"
+  schema_template:
+    file_name: "create_schema.sql"
+    vars:
+      schema_username: "schema_username"
+      schema_name: "schema_name"
+  user_template:
+    file_name: "create_user.sql"
+    vars:
+      schema_username: "schema_username"
+      schema_user_password: "schema_user_password"
+

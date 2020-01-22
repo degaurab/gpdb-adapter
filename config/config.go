@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/degaurab/gbdb-adapter/helper"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+
+	"github.com/degaurab/gpdb-adapter/helper"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {

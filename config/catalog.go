@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/degaurab/gbdb-adapter/helper"
-	"github.com/degaurab/gbdb-adapter/response"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+
+	"github.com/degaurab/gpdb-adapter/helper"
+	"github.com/degaurab/gpdb-adapter/response"
+	"gopkg.in/yaml.v2"
 )
 
 func LoadCatalog(catalogFilePath string, logger *log.Logger) (response.CatalogResponse, error) {

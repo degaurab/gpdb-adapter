@@ -20,15 +20,16 @@ package gpdb_client
 import (
 	"database/sql"
 	"fmt"
-	"github.com/degaurab/gbdb-adapter/config"
-	"github.com/degaurab/gbdb-adapter/helper"
-	_ "github.com/lib/pq"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"path"
 	"regexp"
+
+	"github.com/degaurab/gpdb-adapter/config"
+	"github.com/degaurab/gpdb-adapter/helper"
+	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 )
 
 type DBDriver struct {
@@ -43,9 +44,8 @@ type DBDriver struct {
 	SSLRootCertPath   string
 	ConnectionTimeout int
 	DBTemplate        config.Templates
-	DataDriver			*sql.DB
+	DataDriver        *sql.DB
 }
-
 
 func NewDBDriver() {
 	return
@@ -69,7 +69,7 @@ func (driver DBDriver) TestConnection(logger *log.Logger) error {
 	}
 
 	err = db.Ping()
-	if err !=nil {
+	if err != nil {
 		logger.Println(err)
 		return errors.New("test connection failed")
 	}

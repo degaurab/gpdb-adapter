@@ -17,8 +17,8 @@ type Service struct {
 	Bindable             bool                    `json:"bindable"`
 	InstancesRetrievable bool                    `json:"instances_retrievable,omitempty"`
 	BindingsRetrievable  bool                    `json:"bindings_retrievable,omitempty"`
-	Tags                 []string                `json:"tags,omitempty"`
 	PlanUpdatable        bool                    `json:"plan_updateable"`
+	Tags                 []string                `json:"tags,omitempty"`
 	Plans                []ServicePlan           `json:"plans"`
 	Requires             []string                `json:"requires,omitempty"`
 	Metadata             *ServiceMetadata        `json:"metadata,omitempty"`
@@ -74,11 +74,11 @@ type ServicePlanCost struct {
 
 type ServiceMetadata struct {
 	DisplayName         string `json:"displayName,omitempty"`
-	ImageUrl            string `json:"imageUrl,omitempty"`
+	ImageURL            string `json:"imageUrl,omitempty"`
 	LongDescription     string `json:"longDescription,omitempty"`
 	ProviderDisplayName string `json:"providerDisplayName,omitempty"`
-	DocumentationUrl    string `json:"documentationUrl,omitempty"`
-	SupportUrl          string `json:"supportUrl,omitempty"`
+	DocumentationURL    string `json:"documentationUrl,omitempty"`
+	SupportURL          string `json:"supportUrl,omitempty"`
 	Shareable           *bool  `json:"shareable,omitempty"`
 	AdditionalMetadata  map[string]interface{}
 }

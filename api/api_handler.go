@@ -2,12 +2,13 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/degaurab/gbdb-adapter/config"
-	"github.com/degaurab/gbdb-adapter/gpdb-client"
-	"github.com/degaurab/gbdb-adapter/helper"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/degaurab/gpdb-adapter/config"
+	gpdb_client "github.com/degaurab/gpdb-adapter/gpdb-client"
+	"github.com/degaurab/gpdb-adapter/helper"
+	"github.com/gorilla/mux"
 )
 
 func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Router) {
@@ -16,9 +17,9 @@ func NewApiHandler(log *log.Logger, confPath string, catPath string, r *mux.Rout
 		configPath:  confPath,
 		catalogPath: catPath,
 	}
-	r.HandleFunc("/v2/catalog", api.serviceCatalog).Methods("GET")
-	r.HandleFunc("/v2/create_binding", api.createBinding).Methods("PUT")
-	r.HandleFunc("/v2/delete_binding/{binding_id}", api.deleteBinding).Methods("PUT")
+	r.HandleFunc("/v1/catalog", api.serviceCatalog).Methods("GET")
+	r.HandleFunc("/v1/create_binding", api.createBinding).Methods("PUT")
+	r.HandleFunc("/v1/delete_binding/{binding_id}", api.deleteBinding).Methods("PUT")
 }
 
 type ApiHandler struct {

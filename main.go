@@ -5,11 +5,12 @@ import (
 	"os"
 
 	//"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 
-	"github.com/degaurab/gbdb-adapter/api"
+	"github.com/gorilla/mux"
+
+	"github.com/degaurab/gpdb-adapter/api"
 )
 
 ////CatalogPath for testing
