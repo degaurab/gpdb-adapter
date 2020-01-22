@@ -63,7 +63,7 @@ We can update the files in ./templates/create_*.sql, which are used to bootstrap
     - used to bootstrap schema associated with the user
     - Limitation:
         - you can only use `schema_name` and `schema_username` variables in `create_schema.sql` file, if you are updating the schema details.
-- **./templates/create_schema.sql**
+- **./templates/create_user.sql**
     - used to bootstrap user
     - Limitation:
         - you can only use `schema_username` if `create_user.sql` file, if you are updating the user details.
