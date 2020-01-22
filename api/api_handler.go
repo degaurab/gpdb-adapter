@@ -60,6 +60,11 @@ func (api ApiHandler) createBinding(httpWriter http.ResponseWriter, httpReqest *
 	*/
 	//data := httpReqest.Body
 
+	// TODO: loading confing on each request:
+	// - is costly
+	// - but we dont have to reload app for config changes
+	// - security issues: config can be change without restarting app
+	//
 	c, err := config.LoadConfig(api.configPath, api.logger)
 	if err != nil {
 		resp.Error = err.Error()

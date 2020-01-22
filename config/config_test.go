@@ -1,12 +1,13 @@
 package config_test
 
 import (
+	"io"
+	"log"
+
 	"github.com/degaurab/gbdb-adapter/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
-	"io"
-	"log"
 )
 
 var _ = Describe("LoadConfig", func() {
