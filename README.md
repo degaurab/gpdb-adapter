@@ -5,6 +5,20 @@
 
 
 ----
+### Get started:
+
+```
+# pacakges inside are names as `gpdb-adapter`
+
+$ git clone git@github.com:degaurab/gbb-adapter.git gpdb-adapter
+$ cd gpdb-adapter
+$ ./scripts/install-dependencies.sh
+
+$ go build .
+
+```
+
+----
 
 ### TODO:
 - Add default space for user when we initializing user
