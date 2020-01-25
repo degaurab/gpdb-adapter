@@ -1,6 +1,6 @@
 ## POC: GBDB Adapter
 
-- Designed based on `openservicebroker` api
+- Designed based on [openservicebroker](https://www.openservicebrokerapi.org/) api
 - No tests 
 
 
