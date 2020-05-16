@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"api"
+	"github.com/degaurab/gpdb-adapter/api"
 )
 
 ////CatalogPath for testing
