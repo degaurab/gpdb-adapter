@@ -1,3 +1,5 @@
+![Go](https://github.com/degaurab/gpdb-adapter/workflows/Go/badge.svg?branch=master)
+
 ## POC: GBDB Adapter
 
 - Designed based on [openservicebroker](https://www.openservicebrokerapi.org/) api
